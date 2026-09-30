@@ -1,0 +1,9 @@
+.env
+*.env
+!.env.example
+cv/
+*.db
+sessions/
+cache/
+__pycache__/
+.venv/
