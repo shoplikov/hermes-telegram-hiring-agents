@@ -1,0 +1,25 @@
+# Job War Room — scout (installed by scripts/setup.sh; edit in repo, re-run setup)
+model:
+  default: gpt-5.6-luna
+  provider: openai-api
+  base_url: https://api.openai.com/v1
+agent:
+  reasoning_effort: low
+  max_turns: 30
+platform_toolsets:
+  telegram: [web, memory]
+telegram:
+  require_mention: true
+  exclusive_bot_mentions: true
+  bots_require_mention: true
+  allow_bots: mentions
+  mention_patterns: []
+  reply_to_mode: first
+skills:
+  external_dirs:
+    - __REPO__/agents/scout/skills
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+web:
+  backend: ddgs

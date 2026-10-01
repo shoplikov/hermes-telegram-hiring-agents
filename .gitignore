@@ -7,3 +7,4 @@ sessions/
 cache/
 __pycache__/
 .venv/
+.superpowers/
