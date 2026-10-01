@@ -20,5 +20,7 @@ for p in coordinator scout cv-analyst; do
   grep -q '^TELEGRAM_BOT_TOKEN=.' "$home/.env" && t=set || t=MISSING
   echo "$p: installed (bot token: $t)"
 done
-mkdir -p "$HH/profiles/cv-analyst/cv/history"
+mkdir -p "$HH/profiles/cv-analyst/cv/history" "$HH/profiles/cv-analyst/bin"
+# Stable path for the CV helper so the skill does not depend on where the repo lives.
+ln -sfn "$REPO/agents/cv-analyst/skills/cv-store/scripts/cv_store.py" "$HH/profiles/cv-analyst/bin/cv_store.py"
 echo "Restart the gateway to apply: hermes gateway restart"
