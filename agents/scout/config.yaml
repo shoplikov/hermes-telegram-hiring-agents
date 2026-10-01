@@ -23,3 +23,10 @@ memory:
   user_profile_enabled: true
 web:
   backend: ddgs
+# One shared session per group: the coordinator must see the user's request AND the
+# specialists' RESULT messages in the same context (default true = one session per sender).
+group_sessions_per_user: false
+display:
+  # A RESULT arriving while the agent is mid-turn waits for the next turn instead of
+  # interrupting (default "interrupt" redirected the coordinator's run).
+  busy_input_mode: queue
