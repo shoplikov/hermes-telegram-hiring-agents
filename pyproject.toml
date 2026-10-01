@@ -1,0 +1,11 @@
+[project]
+name = "job-war-room"
+version = "0.1.0"
+requires-python = ">=3.11"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["agents/cv-analyst/skills/cv-store/scripts"]
