@@ -18,9 +18,9 @@ Each agent is a separate Hermes profile (`~/.hermes/profiles/<name>/`) with its 
 
 | Agent (profile) | Bot | Model | Toolsets | Responsibility | Must never |
 |---|---|---|---|---|---|
-| `coordinator` | `@<coordinator>_bot` | `gpt-5.4-mini` ($0.75/$4.5 per 1M) | `memory`, `session_search`, `todo` | Parse request, plan subtasks, delegate by @mention, track pending results, synthesize final brief | Search the web, read the CV |
-| `scout` | `@<scout>_bot` | `gpt-5.6-luna` ($0.2/$1.2) | `web`, `memory` | Research the company: product, stack, culture, recent news, interview reports (Glassdoor, Reddit, Habr, hh.kz, LinkedIn) | See or ask for the CV |
-| `cv-analyst` | `@<analyst>_bot` | `gpt-5.6-terra` ($2/$12) | `file`, `terminal`, `memory`, `skills` | Store the latest CV; assess fit against the posting's real requirements; tailor bullets | Search the web, @mention anyone but the coordinator |
+| `coordinator` | `@alish_hr_coordinator_bot` | `gpt-5.4-mini` ($0.75/$4.5 per 1M) | `memory`, `session_search`, `todo` | Parse request, plan subtasks, delegate by @mention, track pending results, synthesize final brief | Search the web, read the CV |
+| `scout` | `@alish_company_scout_bot` | `gpt-5.6-luna` ($0.2/$1.2) | `web`, `memory` | Research the company: product, stack, culture, recent news, interview reports (Glassdoor, Reddit, Habr, hh.kz, LinkedIn) | See or ask for the CV |
+| `cv-analyst` | `@alish_cv_analyst_bot` | `gpt-5.6-terra` ($2/$12) | `file`, `terminal`, `memory`, `skills` | Store the latest CV; assess fit against the posting's real requirements; tailor bullets | Search the web, @mention anyone but the coordinator |
 
 Model rationale: the coordinator needs dependable instruction-following and structured synthesis, not deep reasoning, so a mini tier suffices. The scout does many cheap tool calls (search → read → summarize), so the smallest current tier. The analyst's output is the core value (judging equivalence of experience, prioritizing gaps) and it runs few calls, so the stronger tier is worth its price. Fallback for the analyst if cost/latency is a problem: `gpt-5.6-luna` (also serves as the small-vs-big comparison for defense Q5).
 
