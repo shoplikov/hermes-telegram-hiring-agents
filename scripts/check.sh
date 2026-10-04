@@ -17,8 +17,10 @@ for p in coordinator scout cv-analyst; do
   home="$HH/profiles/$p"
   echo "$p"
   [ -d "$home" ] || { bad "profile missing; run scripts/setup.sh"; continue; }
-  [ "$(readlink -f "$home/SOUL.md")" = "$REPO/agents/$p/SOUL.md" ] && ok "SOUL.md linked to repo" || bad "SOUL.md not linked; run scripts/setup.sh"
-  grep -q "$REPO/agents/$p/skills" "$home/config.yaml" 2>/dev/null && ok "config.yaml installed" || bad "config.yaml stale; run scripts/setup.sh"
+  [ -f "$home/SOUL.md" ] && ! grep -q '{{' "$home/SOUL.md" && ok "SOUL.md rendered" || bad "SOUL.md missing or has unfilled placeholders; run scripts/setup.sh"
+  grep -q "$home/war-room-skills" "$home/config.yaml" 2>/dev/null && ok "config.yaml installed" || bad "config.yaml stale; run scripts/setup.sh"
+  [ "$REPO/agents/$p/SOUL.md" -nt "$home/SOUL.md" ] && bad "repo SOUL.md is newer than the installed one; run scripts/setup.sh" || true
+  ! grep -rqs '{{' "$home/war-room-skills" && ok "skills rendered" || bad "skills have unfilled placeholders; run scripts/setup.sh"
   for k in TELEGRAM_BOT_TOKEN OPENAI_API_KEY TELEGRAM_ALLOWED_USERS; do
     has "$k" "$home/.env" && ok "$k set" || bad "$k missing in $home/.env"
   done

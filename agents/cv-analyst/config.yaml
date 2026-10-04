@@ -17,7 +17,7 @@ telegram:
   reply_to_mode: first
 skills:
   external_dirs:
-    - __REPO__/agents/cv-analyst/skills
+    - __PROFILE_HOME__/war-room-skills   # rendered from the repo by scripts/setup.sh
 memory:
   memory_enabled: true
   user_profile_enabled: true

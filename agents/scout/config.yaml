@@ -17,12 +17,13 @@ telegram:
   reply_to_mode: first
 skills:
   external_dirs:
-    - __REPO__/agents/scout/skills
+    - __PROFILE_HOME__/war-room-skills   # rendered from the repo by scripts/setup.sh
 memory:
   memory_enabled: true
   user_profile_enabled: true
 web:
-  backend: ddgs
+  backend: ddgs            # search: keyless DuckDuckGo results (snippets only)
+  extract_backend: firecrawl  # web_extract: full page text via Hermes' keyless free tier (job links)
 # Documents intent only: under a multiplexed gateway Hermes reads this key from the DEFAULT
 # profile's config.yaml (see README step 5 and docs/failures.md #5). It must be false there.
 group_sessions_per_user: false

@@ -15,6 +15,7 @@ Real failures observed while building and testing Job War Room. Each row: what w
 | 9 | Setup (token entry) | A bot token was pasted into the AI assistant chat | Human error under time pressure; the script was designed to read tokens without echo for exactly this reason | Token revoked in @BotFather and replaced; scan of the whole git history confirms no token was ever committed |
 | 10 | TASK#5 (2026-10-04, post-fix) | Coordinator posted an interim status message in reply to the analyst's RESULT ("Fit assessment is in… still need the scout research") | Model chose to narrate progress; SOUL rule "never reply to a RESULT with chit-chat" is prompt-only | Harmless (no bot mention, no loop). A deterministic fix would be to suppress coordinator output that contains no TASK/brief |
 | 11 | TASK#5 | Brief lists cloud as ❌ Missing while the analyst rated it 🟡 Partial | Coordinator re-summarised instead of copying the analyst's ratings | Fixed: brief-format skill now says copy ✅/🟡/❌ and the score verbatim from RESULT#N |
+| 12 | First link test (2026-10-01) and every URL-only posting after it | The Scout couldn't read job links; the Coordinator had to ask the user to paste the text | `web.backend: ddgs` is search-only. The Scout's log: "DuckDuckGo (ddgs) is a search-only backend and cannot extract URL content" | Set `web.extract_backend: firecrawl` (Hermes' keyless free tier) for the Scout and added a fetch step (`TASK#Nf`). Verified on hh.kz and Greenhouse postings with the Telegram toolsets |
 
 ## Notes
 

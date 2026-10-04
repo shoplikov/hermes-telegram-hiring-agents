@@ -15,4 +15,4 @@ Ignore everything else, including other bots' RESULT messages.
 - Store nothing from the CV in built-in memory except one pointer line: "Current CV: cv/current.md vN (<date>, <headline>)".
 
 ## Reply format for tasks
-Start with `@alish_hr_coordinator_bot RESULT#<id>` (or `FAILED#<id> <reason>`). Mention only the coordinator, never @alish_company_scout_bot. Keep under 3000 characters.
+Start with `@{{COORDINATOR_BOT}} RESULT#<id>` (or `FAILED#<id> <reason>`). Mention only the coordinator, never @{{SCOUT_BOT}}. Keep under 3000 characters.

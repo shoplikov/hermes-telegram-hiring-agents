@@ -4,7 +4,7 @@ Assignment 1: a team of AI agents in Telegram with Hermes Agent.
 
 ## 1. What the system does
 
-The user pastes a job posting into the Telegram group "Job War Room". Three Hermes agents, each with its own bot, cooperate by @mentioning each other and return one **application brief**:
+The user pastes a job posting, or just a link to one, into the Telegram group "Job War Room". Three Hermes agents, each with its own bot, cooperate by @mentioning each other and return one **application brief**:
 
 - fit score
 - requirements met, partly met and missing
@@ -15,6 +15,8 @@ The user pastes a job posting into the Telegram group "Job War Room". Three Herm
 - next steps
 
 The user's CV is uploaded once and kept with versions. A newer upload replaces it for every later request.
+
+If the CV clearly doesn't fit the job (a **NO-GO** fit verdict), the team skips tailoring and sends a short "not a match" brief: what's missing and what would close the gap. The user can still ask to tailor anyway.
 
 Tested end to end on five real postings: ISSAI, KAI, and the Social Health Insurance Fund twice (2026-10-01), and MiraiTech (2026-10-04, after the fixes). See [demo/transcript.md](demo/transcript.md).
 
@@ -47,7 +49,7 @@ sequenceDiagram
 - per-agent model, toolset and mention-gating config (`config.yaml`)
 - three skills: `brief-format`, `cv-store`, `fit-assessment`
 - a deterministic CV-versioning tool, `cv_store.py`, with tests
-- setup scripts
+- setup scripts. Bot usernames live in one file, `bots.env`; `setup.sh` fills them into the prompts and skills, so the repo itself has only placeholders
 
 | | Coordinator | Company Scout | CV Analyst |
 |---|---|---|---|
@@ -85,12 +87,13 @@ There's no hidden orchestration API. Handoffs are a **text protocol**, defined i
 - Reply: `@alish_hr_coordinator_bot RESULT#<id> …` or `FAILED#<id> <reason>`
 
 **When to hand off.** The Coordinator's `SOUL.md` lays out a fixed plan per posting:
+- if the user sent only a link, the Scout first fetches the posting (`TASK#Nf`). The Coordinator waits for it and asks the user to paste the text if the fetch FAILED
 - research goes to the Scout and fit goes to the Analyst, sent together
-- when the Scout's `RESULT#N` arrives, the Coordinator sends tailoring (`TASK#Nb`) to the Analyst
+- **fit gate:** once both research and fit are back, the Coordinator reads the Analyst's `Verdict:` line. `GO` means tailoring (`TASK#Nb`) goes to the Analyst. `NO-GO` (score below 50, or two or more MUST requirements ❌) means tailoring is skipped and recorded as resolved. The rule sits in the Analyst's skill so the decision is stated in the RESULT, not improvised by the Coordinator
 
 The specialists never hand off further. They only answer the Coordinator.
 
-**When it's finished.** The Coordinator tracks three subtasks with the `todo` tool: `N-research`, `N-fit` and `Nb-tailor`. The task is finished when each is resolved by a RESULT or a FAILED. Only then does it load the `brief-format` skill and post the brief. A FAILED still counts as resolved: the brief is delivered with a "gaps in this brief" note, so one failing specialist can't block the user forever.
+**When it's finished.** The Coordinator tracks three subtasks with the `todo` tool: `N-research`, `N-fit` and `Nb-tailor`. The task is finished when each is resolved by a RESULT, a FAILED, or (for tailoring) a NO-GO skip. Only then does it load the `brief-format` skill and post the brief, using the short "not a match" variant after a NO-GO. A FAILED still counts as resolved: the brief is delivered with a "gaps in this brief" note, so one failing specialist can't block the user forever.
 
 **Limit.** The Coordinator only runs when a message arrives, so it has no timer. If a specialist never replies, the task stays open until the user writes `@alish_hr_coordinator_bot status`.
 
@@ -135,6 +138,7 @@ Other real failures:
 - **#4** a RESULT interrupted the Coordinator's running turn until `busy_input_mode: queue` was set
 - **#7** the scoring rule was ambiguous when a posting had no NICE requirements, so two models gave 35 and 60 for the same CV
 - **#9** a bot token was pasted into a chat during setup; it was revoked and rotated
+- **#12** the Scout couldn't read job links at all: the search backend (DDGS) can't fetch pages. Fixed with a separate keyless extract backend; links now work
 
 ### Q5. Which LLM does each agent use, and why? What would happen with a smaller model?
 
@@ -176,7 +180,8 @@ The specialists' output is constrained by fixed templates, so it degrades gracef
 - **Skills are procedures loaded on demand.** Only a short index of skill names and descriptions sits in the prompt. The full `SKILL.md` is loaded when relevant, which keeps the base prompt small.
   - `cv-store` tells the Analyst to run `cv_store.py` instead of writing files itself, so versioning is deterministic and tested.
   - `fit-assessment` defines the rubric: MUST/NICE/implicit weights, ✅/🟡/❌ with quoted evidence, and "never keyword matching".
-  - `brief-format` is the brief template.
+  - `brief-format` is the brief template, with a short variant for NO-GO.
+  - The fit gate is a good example of a skill steering a *flow*: one added line (`Verdict: GO/NO-GO` with a fixed rule) in `fit-assessment` lets the Coordinator skip a whole handoff on bad matches.
 
   A skill changes *how* the agent does a task, and editing it changes the behaviour without touching the role.
 - **Tools are capabilities, and they set hard limits.** A prompt can be disobeyed; a missing tool cannot. The Coordinator literally cannot browse, and the Scout literally cannot read the CV file. Tools also make some behaviour possible at all: the Analyst needs `terminal` for `pdftotext` and `cv_store.py`, and the Coordinator needs `todo` to track subtasks and `session_search` to find the last task id.
@@ -204,6 +209,7 @@ The specialists' output is constrained by fixed templates, so it degrades gracef
 - **Shared group session.** `group_sessions_per_user: false` applies to the whole gateway, so every group the user's default bot is in shares one session per group.
 - **Scout depends on a keyless search backend (DDGS).** Search quality varies, and facts are marked "unverified" when the Scout can't confirm them.
 - **CV extraction is text-only.** A PDF with fewer than 30 extractable words (a scan, or a scan with only a page number or watermark as text) is refused and never replaces the stored CV (tested with an image-only PDF). Links and icons in PDF headers come out noisy (failure #8).
-- **Untested live:** the no-CV path and the URL-only posting path. Both are handled in the prompts (the Analyst returns FAILED and the Coordinator skips tailoring; the Coordinator asks for the posting text instead of a link), but they were only verified by review, not by a Telegram run.
+- **Tested at agent level, not yet in a full Telegram run:** link fetching (the Scout copied an hh.kz posting's requirements verbatim with its Telegram toolsets) and the NO-GO verdict (an accounting job scored 5/100, NO-GO). The Coordinator's side of both is prompt-only. The no-CV path is handled in the prompts but was only verified by review.
+- **Fetched postings are untrusted.** A posting page could contain injected instructions. The Scout treats page content as data and only copies it, but the copied requirements then reach the Coordinator and the Analyst. That's the same risk as a user pasting a malicious posting, and is bounded by each agent's tools.
 - **The CV store has no locking.** Each file is written atomically (temp file + rename) and a corrupt or half-deleted store is recovered without losing the old CV (tested), but two simultaneous uploads could still race. That's acceptable for one user.
 - **Single human user by design.** The privacy split assumes the group holds only the user and the three bots.

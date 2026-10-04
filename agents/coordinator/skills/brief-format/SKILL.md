@@ -10,7 +10,7 @@ metadata:
 # brief-format
 
 ## When to Use
-All subtasks of TASK#N (research, fit, tailor) have a RESULT or FAILED.
+All subtasks of TASK#N (research, fit, tailor) are resolved: RESULT, FAILED, or tailoring skipped. Use the short variant when the analyst's verdict was NO-GO.
 
 ## Template
 📋 **Application brief — <Role> @ <Company>** (TASK#N)
@@ -23,6 +23,18 @@ All subtasks of TASK#N (research, fit, tailor) have a RESULT or FAILED.
 **Questions to ask them (3):**
 **Next steps:** 2–3 concrete actions
 _Gaps in this brief:_ list any FAILED subtasks, else omit
+
+If the posting came from a link (TASK#Nf), add its source URL on the first line under the title.
+
+## Short variant — NO-GO (tailoring skipped)
+📋 **Not a match — <Role> @ <Company>** (TASK#N)
+
+**Fit:** NN/100 — NO-GO (from analyst)
+**Missing:** the ❌ MUST requirements, verbatim
+**What would close the gap:** the analyst's top gaps
+**About the company:** 2 lines from scout + red flags (if any)
+**Worth it anyway?** one honest line (e.g. "apply only if the role is flexible on X")
+_Reply "tailor anyway" to get tailored CV bullets._
 
 ## Rules
 - Copy the ✅/🟡/❌ ratings and the fit score verbatim from the analyst's RESULT; never re-grade a requirement.
