@@ -11,3 +11,4 @@ __pycache__/
 # Never commit a CV or other uploaded documents
 *.pdf
 *.docx
+!bots.env
