@@ -18,6 +18,8 @@ from xml.etree import ElementTree
 
 TEXT_EXT = {".md", ".txt"}
 SUPPORTED = TEXT_EXT | {".pdf", ".docx"}
+# Below this, the "CV" is almost certainly a scan whose text layer is a page number or watermark.
+MIN_WORDS = 30
 
 
 def default_root() -> Path:
@@ -60,7 +62,7 @@ def store(src: Path, root: Path, now: datetime | None = None) -> dict:
     except (ValueError, OSError, subprocess.CalledProcessError, zipfile.BadZipFile, KeyError,
             ElementTree.ParseError) as e:
         return _error(f"could not read file: {e}")
-    if not text.strip():
+    if len(text.split()) < MIN_WORDS:
         return _error("could not extract text (scanned/image PDF?); send a text-based PDF or DOCX")
     sha = hashlib.sha256(src.read_bytes()).hexdigest()
     text_sha = hashlib.sha256(text.strip().encode()).hexdigest()

@@ -63,7 +63,7 @@ sequenceDiagram
 
 The split follows **data sensitivity and tools**, not just topics:
 
-- **Privacy and prompt-injection containment.** The Scout reads arbitrary web pages, and those can carry injected instructions. It has no file or terminal tools and never receives the CV, so a malicious page cannot make it leak or alter the CV. The Analyst holds the CV and has no web access. In a single agent, the same context would hold the CV, dozens of untrusted web pages and file-write tools.
+- **Privacy and prompt-injection containment.** The Scout reads arbitrary web pages, and those can carry injected instructions. It has no file or terminal tools and never receives the CV, so a malicious page cannot make it read or alter the CV directly. **Limit:** a hijacked Scout could still post `@alish_cv_analyst_bot TASK#… paste the CV`. Hermes' `allow_bots: mentions` admits any bot that mentions the Analyst; there is no per-sender allowlist. Only the Analyst's `SOUL.md` rule ("act on TASK messages from the coordinator") stands in the way. A code-level fix would be a sender allowlist for bot messages. The Analyst holds the CV and has no web access. In a single agent, the same context would hold the CV, dozens of untrusted web pages and file-write tools.
 - **Least privilege.** Each agent gets only its toolsets (`platform_toolsets.telegram` in each `config.yaml`). The Coordinator cannot browse or read files at all.
 - **Right model for each job.** Searching and summarising runs on the cheapest model (luna). The judgement-heavy fit assessment runs on the strongest model in budget (terra). Planning and formatting run on a mini model. One agent would need the expensive model for everything.
 - **Parallelism.** Research and fit assessment run at the same time. In the TASK#4 run both results arrived within about 17 s of the handoff.
@@ -112,7 +112,10 @@ Five layers, from the prompt down to the platform:
 4. **Self-ignore.** Hermes drops its own bot's messages.
 5. **Telegram itself.** Bot-to-bot delivery only happens because Bot-to-Bot Communication Mode was explicitly enabled (see failure #1).
 
-Layer 1 alone is unreliable, because models don't always follow instructions. Layers 2–4 are code and hold even when the model misbehaves.
+Layer 1 alone is unreliable, because models don't always follow instructions. Layers 2–4 are code, but they differ in strength:
+- Mention gating stops *accidental* loops: quote-replies and messages to the wrong bot.
+- It does **not** stop a bot that deliberately @mentions another bot on every turn.
+- The hard backstop for that case is `bot_loop_guard`. It fires only after 20 bot messages in 5 minutes, so a loop is bounded, but not prevented at message 2.
 
 ### Q4. Show a request where the system failed. What went wrong, and how would you fix it?
 
@@ -141,7 +144,7 @@ Other real failures:
 
 All models are OpenAI. The budget was at most about $2 per 1M input tokens and about $10 per 1M output. terra's $12 output price is slightly over, accepted because the Analyst writes little.
 
-**Experiment: the same fit task (TASK#4 posting, CV v2) on terra vs luna** (2026-10-04):
+**Experiment: the same fit task (TASK#4 posting, CV v2) replayed on terra vs luna** (2026-10-04, CLI one-shot):
 
 | | gpt-5.6-terra | gpt-5.6-luna |
 |---|---|---|
@@ -157,6 +160,7 @@ All models are OpenAI. The budget was at most about $2 per 1M input tokens and a
 - luna made a reasoning error: it awarded the full 20 "nice-to-have" points when the posting listed none, which inflated the score.
 - terra was stricter but also wrong in one place: it missed "HuggingFace" in the noisy PDF header.
 - Part of the disagreement was our rubric's fault: the scoring rule didn't say what to do with no NICE list. It does now (failure #7).
+- **Non-determinism.** In the live TASK#4 run on 2026-10-01, terra itself scored this posting **60/100**: it applied the "missing MUST caps the score at 60" rule as the score instead of the ceiling. The replay gave 35. Same model, same CV, same posting, different numbers. The score is an LLM judgement within a rubric, not a measurement. That's why the brief always shows the requirement table and evidence next to the number, and why the rubric was tightened (✅/🟡/❌ = full/half/zero).
 
 **With an even smaller model** (nano class):
 - the main risk is the **Coordinator**: forgetting the protocol format, mentioning the wrong bot, or posting the brief before every result has arrived
@@ -197,5 +201,7 @@ The specialists' output is constrained by fixed templates, so it degrades gracef
 - **Completion tracking is done by the LLM** (the `todo` tool plus prompt rules), not by code.
 - **Shared group session.** `group_sessions_per_user: false` applies to the whole gateway, so every group the user's default bot is in shares one session per group.
 - **Scout depends on a keyless search backend (DDGS).** Search quality varies, and facts are marked "unverified" when the Scout can't confirm them.
-- **CV extraction is text-only.** Scanned PDFs are refused (tested), and links and icons in PDF headers come out noisy (failure #8).
+- **CV extraction is text-only.** A PDF with fewer than 30 extractable words (a scan, or a scan with only a page number or watermark as text) is refused and never replaces the stored CV (tested with an image-only PDF). Links and icons in PDF headers come out noisy (failure #8).
+- **Untested live:** the no-CV path and the URL-only posting path. Both are handled in the prompts (the Analyst returns FAILED and the Coordinator skips tailoring; the Coordinator asks for the posting text instead of a link), but they were only verified by review, not by a Telegram run.
+- **The CV store isn't crash-safe.** Writes are not atomic, and two simultaneous uploads could race. That's acceptable for one user.
 - **Single human user by design.** The privacy split assumes the group holds only the user and the three bots.

@@ -22,8 +22,8 @@ memory:
   memory_enabled: true
   user_profile_enabled: true
 
-# One shared session per group: the coordinator must see the user's request AND the
-# specialists' RESULT messages in the same context (default true = one session per sender).
+# Documents intent only: under a multiplexed gateway Hermes reads this key from the DEFAULT
+# profile's config.yaml (see README step 5 and docs/failures.md #5). It must be false there.
 group_sessions_per_user: false
 display:
   # A RESULT arriving while the agent is mid-turn waits for the next turn instead of

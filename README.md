@@ -95,7 +95,7 @@ hermes profile list        # coordinator, scout, cv-analyst should show "running
 In the group:
 
 1. **Upload your CV** — send the PDF/DOCX with caption `@alish_cv_analyst_bot new CV`. Reply: `✅ CV v1 saved …`. Re-uploading the same file → "Same CV as v1". A changed file → v2 with a summary of what changed.
-2. **Ask for a brief** — `@alish_hr_coordinator_bot Prepare me for this job:` followed by the full posting text. Within ~1–2 minutes you see the handoffs (`TASK#N`, `RESULT#N`, `TASK#Nb`) and then the 📋 brief: fit score, met/partial/missing requirements, company summary and red flags, tailored CV bullets, likely interview questions, questions to ask, next steps.
+2. **Ask for a brief** — `@alish_hr_coordinator_bot Prepare me for this job:` followed by the full posting **text** (a link alone is not enough; the coordinator will ask you to paste the text). Within ~1–2 minutes you see the handoffs (`TASK#N`, `RESULT#N`, `TASK#Nb`) and then the 📋 brief: fit score, met/partial/missing requirements, company summary and red flags, tailored CV bullets, likely interview questions, questions to ask, next steps.
 3. **Status** — `@alish_hr_coordinator_bot status` lists pending subtasks.
 
 Address one bot per message. A message that mentions several bots wakes all of them.
@@ -103,7 +103,7 @@ Address one bot per message. A message that mentions several bots wakes all of t
 ## Tests
 
 ```bash
-uv run pytest -q     # cv_store.py: versioning, unchanged detection, history, empty/scanned PDF, PDF/DOCX extraction
+uv run pytest -q     # cv_store.py: versioning, unchanged detection, history, image-only/near-empty PDFs refused, PDF/DOCX extraction
 ```
 
 ## Troubleshooting

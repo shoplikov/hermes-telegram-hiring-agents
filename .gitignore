@@ -8,3 +8,6 @@ cache/
 __pycache__/
 .venv/
 .superpowers/
+# Never commit a CV or other uploaded documents
+*.pdf
+*.docx

@@ -14,13 +14,18 @@ def write(tmp_path: Path, name: str, text: str) -> Path:
     return p
 
 
+def cv(tag: str) -> str:
+    """Realistic-length CV text (cv_store refuses near-empty extractions)."""
+    return f"{tag} CV. ML Engineer, Astana. " + "Built production RAG and agent systems in Python. " * 6
+
+
 T1 = datetime(2026, 10, 1, 12, 0, 0)
 T2 = datetime(2026, 10, 2, 12, 0, 0)
 
 
 def test_first_upload_creates_v1(tmp_path):
     root = tmp_path / "cv"
-    src = write(tmp_path, "cv.md", "# Alisher\nML Engineer, 6 years")
+    src = write(tmp_path, "cv.md", "# Alisher\n" + cv("ML Engineer"))
     r = cv_store.store(src, root, now=T1)
     assert r["status"] == "stored" and r["version"] == 1 and r["previous_version"] is None
     cur = (root / "current.md").read_text()
@@ -31,27 +36,27 @@ def test_first_upload_creates_v1(tmp_path):
 
 def test_same_content_different_name_is_unchanged(tmp_path):
     root = tmp_path / "cv"
-    cv_store.store(write(tmp_path, "a.md", "same text"), root, now=T1)
-    r = cv_store.store(write(tmp_path, "b.md", "same text"), root, now=T2)
+    cv_store.store(write(tmp_path, "a.md", cv("same")), root, now=T1)
+    r = cv_store.store(write(tmp_path, "b.md", cv("same")), root, now=T2)
     assert r["status"] == "unchanged" and r["version"] == 1
     assert not (root / "history").exists() or not any((root / "history").iterdir())
 
 
 def test_new_content_rotates_history(tmp_path):
     root = tmp_path / "cv"
-    cv_store.store(write(tmp_path, "a.md", "old cv"), root, now=T1)
-    r = cv_store.store(write(tmp_path, "b.md", "new cv"), root, now=T2)
+    cv_store.store(write(tmp_path, "a.md", cv("old")), root, now=T1)
+    r = cv_store.store(write(tmp_path, "b.md", cv("new")), root, now=T2)
     assert r["status"] == "stored" and r["version"] == 2 and r["previous_version"] == 1
-    assert "old cv" in (root / "history" / "v1.md").read_text()
-    assert "new cv" in (root / "current.md").read_text()
+    assert "old CV" in (root / "history" / "v1.md").read_text()
+    assert "new CV" in (root / "current.md").read_text()
 
 
 def test_empty_extraction_does_not_overwrite(tmp_path):
     root = tmp_path / "cv"
-    cv_store.store(write(tmp_path, "a.md", "good cv"), root, now=T1)
+    cv_store.store(write(tmp_path, "a.md", cv("good")), root, now=T1)
     r = cv_store.store(write(tmp_path, "scan.md", "   \n  "), root, now=T2)
     assert r["status"] == "error" and "extract" in r["message"]
-    assert "good cv" in (root / "current.md").read_text()
+    assert "good CV" in (root / "current.md").read_text()
     assert json.loads((root / "current.meta.json").read_text())["version"] == 1
 
 
@@ -61,7 +66,7 @@ def test_show_without_cv_is_error(tmp_path):
 
 def test_show_reports_current(tmp_path):
     root = tmp_path / "cv"
-    cv_store.store(write(tmp_path, "a.md", "x"), root, now=T1)
+    cv_store.store(write(tmp_path, "a.md", cv("x")), root, now=T1)
     s = cv_store.show(root)
     assert s["version"] == 1 and s["path"].endswith("current.md")
 
@@ -98,3 +103,22 @@ def test_docx_extraction(tmp_path):
     with zipfile.ZipFile(docx, "w") as z:
         z.writestr("word/document.xml", xml)
     assert cv_store.extract_text(docx) == "Senior Engineer\nAlmaty"
+
+
+def test_tiny_text_layer_is_refused(tmp_path):
+    # A scanned PDF often carries only a page number or watermark as text.
+    root = tmp_path / "cv"
+    good = "ML Engineer at Example LLC, 2024-2026. Built RAG systems with Python and PyTorch. " * 3
+    cv_store.store(write(tmp_path, "a.md", good), root, now=T1)
+    r = cv_store.store(write(tmp_path, "scan.md", "Page 1"), root, now=T2)
+    assert r["status"] == "error" and "extract" in r["message"]
+    assert "Example LLC" in (root / "current.md").read_text()
+
+
+def test_image_only_pdf_is_refused(tmp_path):
+    if not shutil.which("pdftotext"):
+        pytest.skip("no pdftotext")
+    pdf = tmp_path / "scan.pdf"
+    pdf.write_bytes(MINIMAL_PDF.replace(b"(Hello CV) Tj", b""))
+    r = cv_store.store(pdf, tmp_path / "cv", now=T1)
+    assert r["status"] == "error"

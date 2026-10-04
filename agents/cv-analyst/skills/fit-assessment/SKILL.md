@@ -27,7 +27,7 @@ metadata:
    **CV used:** v<version> (<uploaded_at>)
 
 ## Procedure — tailor bullets (TASK#Nb)
-1. Re-read `~/.hermes/profiles/cv-analyst/cv/current.md`.
+1. Re-read `~/.hermes/profiles/cv-analyst/cv/current.md`. If it does not exist → reply `@alish_hr_coordinator_bot FAILED#Nb no CV stored` and stop. Never write bullets without a CV.
 2. Write 3–6 bullets that rephrase real CV experience to match the role and the company context given. Each bullet: action verb, scope, measurable result if the CV has one. Never invent numbers or experience.
 3. Reply `@alish_hr_coordinator_bot RESULT#Nb` followed by the bullets.
 
