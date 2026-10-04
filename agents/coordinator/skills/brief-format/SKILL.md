@@ -25,4 +25,5 @@ All subtasks of TASK#N (research, fit, tailor) have a RESULT or FAILED.
 _Gaps in this brief:_ list any FAILED subtasks, else omit
 
 ## Rules
+- Copy the ✅/🟡/❌ ratings and the fit score verbatim from the analyst's RESULT; never re-grade a requirement.
 - Under 3500 characters. No bot mentions. Don't add facts not present in the specialists' results except the interview/ask questions, which you write yourself.

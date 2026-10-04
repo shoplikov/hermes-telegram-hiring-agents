@@ -16,7 +16,7 @@ The user pastes a job posting into the Telegram group "Job War Room". Three Herm
 
 The user's CV is uploaded once and kept with versions. A newer upload replaces it for every later request.
 
-Tested end to end on four real postings on 2026-10-01: ISSAI, KAI, and the Social Health Insurance Fund twice. See [demo/transcript.md](demo/transcript.md).
+Tested end to end on five real postings: ISSAI, KAI, and the Social Health Insurance Fund twice (2026-10-01), and MiraiTech (2026-10-04, after the fixes). See [demo/transcript.md](demo/transcript.md).
 
 ## 2. Architecture
 
@@ -126,6 +126,7 @@ All failures are logged in [failures.md](failures.md). The most instructive one:
 - **Diagnosis.** In the logs, the Coordinator's session keys ended in the *sender's* user id: one session for the user, one for the Scout, one for the Analyst. Each RESULT woke a *different* Coordinator session. Each one rebuilt the context with `session_search`, decided it was its job to continue, and acted.
 - **Cause.** Hermes isolates group sessions per participant by default (`group_sessions_per_user: true`). We had set it to `false` in each agent's `config.yaml`, but the gateway source showed that under the multiplexed gateway this key is read **process-wide from the default profile's config**. The per-profile setting was silently ignored.
 - **Fix.** Set `group_sessions_per_user: false` in the default profile. As defence in depth, the Coordinator's `SOUL.md` now has an idempotency rule ("each handoff and the brief at most once; check todo first") and an explicit id example (`TASK#3b, never TASK#3`).
+- **Verified.** In the next real run (TASK#5, MiraiTech, 2026-10-04) every Coordinator turn ran in one session. It sent exactly one `TASK#5b` and posted exactly one brief. See run 2 in [demo/transcript.md](demo/transcript.md).
 - **What I'd do next.** Move completion tracking out of the LLM: a small skill script that records `TASK#N` state in a file and refuses duplicates, so idempotency doesn't depend on the model.
 
 Other real failures:

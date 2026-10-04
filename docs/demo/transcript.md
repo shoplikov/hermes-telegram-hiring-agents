@@ -1,4 +1,26 @@
-# Demo transcript — TASK#4 (2026-10-01, real posting)
+# Demo transcripts
+
+## Run 2 — TASK#5 (2026-10-04 21:13, after fixes #5–#7) — clean run
+
+Request: Senior Machine Learning Engineer, MiraiTech (SportTech startup, Astana). CV used: v2. All coordinator turns ran in ONE session (`agent:coordinator:telegram:group:-1004373703428`, no per-sender suffix), confirming fix #5.
+
+| Time | From → To | Message |
+|---|---|---|
+| 21:13 | user → coordinator | posting text |
+| 21:13 | coordinator → scout + analyst | plan + `@alish_company_scout_bot TASK#5 research MiraiTech …` + `@alish_cv_analyst_bot TASK#5 assess fit … MUST: … NICE: none specified` |
+| 21:14 | analyst → coordinator | `RESULT#5` fit 77/100 (MUST 70.7/90 + implicit 6/10, new rubric), 7-row requirement table with quoted evidence, 3 gaps (commercial tenure, time-series/sensor data, cloud) |
+| 21:14 | scout → coordinator | `RESULT#5` product (sensor insoles, 100 Hz data), team, 2026 news (Wearable Technologies Innovation World Cup, federation pilots), no interview reports found (marked unverified), startup-risk red flags, 6 sources |
+| 21:14 | coordinator → user | interim status "Fit assessment is in… still need the scout research" (rule violation, failures #10) |
+| 21:14 | coordinator → analyst | `@alish_cv_analyst_bot TASK#5b tailor 3-6 CV bullets … using this company context: …` (exactly once, correct `b` id) |
+| 21:14 | analyst → coordinator | `RESULT#5b` 6 bullets |
+| 21:15 | coordinator → user | 📋 final brief, exactly once |
+
+Compared with run 1: one tailoring handoff instead of two, correct `TASK#5b` id, one brief instead of two.
+
+---
+
+## Run 1 — TASK#4 (2026-10-01, before fixes)
+
 
 Request: Senior AI Engineer, NJSC "Social Health Insurance Fund" (Astana), pasted by the user in the "Job War Room" group with `@alish_hr_coordinator_bot`.
 Reconstructed from the three agents' `state.db` session stores and gateway logs. CV used: v2.

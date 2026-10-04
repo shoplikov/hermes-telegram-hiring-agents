@@ -13,6 +13,8 @@ Real failures observed while building and testing Job War Room. Each row: what w
 | 7 | Q5 model comparison (same TASK, same CV) | `gpt-5.6-luna` scored 60/100, `gpt-5.6-terra` 35/100 | Rubric gap: posting had no NICE requirements; luna awarded the full 20 NICE points, terra awarded 0. Skill didn't say what to do | fit-assessment skill: if no NICE, MUST weight becomes 90%; ✅/🟡/❌ = full/half/zero |
 | 8 | Q5 comparison | terra rated Hugging Face 🟡 "not evidenced" although "HuggingFace" appears in the CV header (as a profile link) | PDF-to-text puts header icons/links on one noisy line; model read it as contact info | Accepted limit; ambiguous evidence. Could be fixed by extracting PDF links separately |
 | 9 | Setup (token entry) | A bot token was pasted into the AI assistant chat | Human error under time pressure; the script was designed to read tokens without echo for exactly this reason | Token revoked in @BotFather and replaced; scan of the whole git history confirms no token was ever committed |
+| 10 | TASK#5 (2026-10-04, post-fix) | Coordinator posted an interim status message in reply to the analyst's RESULT ("Fit assessment is in… still need the scout research") | Model chose to narrate progress; SOUL rule "never reply to a RESULT with chit-chat" is prompt-only | Harmless (no bot mention, no loop). A deterministic fix would be to suppress coordinator output that contains no TASK/brief |
+| 11 | TASK#5 | Brief lists cloud as ❌ Missing while the analyst rated it 🟡 Partial | Coordinator re-summarised instead of copying the analyst's ratings | Fixed: brief-format skill now says copy ✅/🟡/❌ and the score verbatim from RESULT#N |
 
 ## Notes
 
