@@ -214,7 +214,7 @@ scripts/
 tests/test_cv_store.py   # unit tests for the CV store
 docs/
 ├── report.md            # architecture + answers to defense questions Q1–Q7
-├── failures.md          # 12 real failures: symptom, cause, fix
+├── failures.md          # 13 real failures: symptom, cause, fix
 ├── demo/transcript.md   # end-to-end runs before and after the fixes
 └── superpowers/         # design spec and implementation plan
 ```
