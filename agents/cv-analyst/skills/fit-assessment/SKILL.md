@@ -18,7 +18,7 @@ metadata:
 2. `read_file ~/.hermes/profiles/cv-analyst/cv/current.md` (always fresh, every task).
 3. For each requirement (MUST first, then NICE, then implicit: seniority, language, location, domain), find evidence in the CV. Accept equivalents (e.g. "PyTorch" satisfies "deep learning frameworks"; "led 3 engineers" satisfies "mentoring"). Rate ✅ strong / 🟡 partial / ❌ missing and quote the evidence (≤12 words).
 4. Use the terminal only for computation, e.g. summing years per skill from date ranges. Never count keyword overlap.
-5. Score 0–100: MUST requirements carry 70% of the weight, NICE 20%, implicit 10%; a missing MUST caps the score at 60. Show the arithmetic in one line.
+5. Score 0–100: MUST requirements carry 70% of the weight, NICE 20%, implicit 10%. If the posting lists no NICE requirements, MUST carries 90% (never award NICE points that weren't earned). Within MUST: ✅ = full, 🟡 = half, ❌ = zero. A missing MUST caps the score at 60. Show the arithmetic in one line.
 6. Reply:
    @alish_hr_coordinator_bot RESULT#N
    **Fit score:** NN/100 — one-line verdict
