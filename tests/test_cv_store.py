@@ -122,3 +122,33 @@ def test_image_only_pdf_is_refused(tmp_path):
     pdf.write_bytes(MINIMAL_PDF.replace(b"(Hello CV) Tj", b""))
     r = cv_store.store(pdf, tmp_path / "cv", now=T1)
     assert r["status"] == "error"
+
+
+def test_corrupt_meta_keeps_old_cv_as_orphan(tmp_path):
+    root = tmp_path / "cv"
+    cv_store.store(write(tmp_path, "a.md", cv("old")), root, now=T1)
+    (root / "current.meta.json").write_text("{not json")
+    assert cv_store.show(root)["status"] == "error"
+    r = cv_store.store(write(tmp_path, "b.md", cv("new")), root, now=T2)
+    assert r["status"] == "stored" and r["version"] == 1
+    orphans = list((root / "history").glob("orphan-*.md"))
+    assert len(orphans) == 1 and "old CV" in orphans[0].read_text()
+    assert "new CV" in (root / "current.md").read_text()
+
+
+def test_meta_without_current_is_not_unchanged(tmp_path):
+    root = tmp_path / "cv"
+    cv_store.store(write(tmp_path, "a.md", cv("one")), root, now=T1)
+    cv_store.store(write(tmp_path, "b.md", cv("two")), root, now=T1)
+    (root / "current.md").unlink()
+    assert cv_store.show(root)["status"] == "error"
+    # Re-uploading the same file must restore it, continuing the version count from history/.
+    r = cv_store.store(write(tmp_path, "b.md", cv("two")), root, now=T2)
+    assert r["status"] == "stored" and r["version"] == 2
+    assert "two CV" in (root / "current.md").read_text()
+
+
+def test_no_temp_files_left_behind(tmp_path):
+    root = tmp_path / "cv"
+    cv_store.store(write(tmp_path, "a.md", cv("one")), root, now=T1)
+    assert not list(root.glob("*.tmp"))

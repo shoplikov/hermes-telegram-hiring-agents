@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Usage: scripts/set-token.sh <coordinator|scout|cv-analyst>  — reads the BotFather token without echo.
 set -euo pipefail
+case "${1:-}" in coordinator|scout|cv-analyst) ;; *) echo "usage: $0 <coordinator|scout|cv-analyst>" >&2; exit 1;; esac
 p="$1"; envf="${HERMES_ROOT:-$HOME/.hermes}/profiles/$p/.env"
 [ -f "$envf" ] || { echo "run scripts/setup.sh first" >&2; exit 1; }
 [ -t 0 ] || { echo "needs an interactive terminal: run it in a normal terminal window, not via Claude's ! prefix" >&2; exit 1; }

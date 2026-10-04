@@ -46,8 +46,27 @@ def extract_text(src: Path) -> str:
 
 
 def _meta(root: Path) -> dict | None:
+    """Metadata of the stored CV, or None if there is no usable one (missing or corrupt)."""
     f = root / "current.meta.json"
-    return json.loads(f.read_text()) if f.exists() else None
+    if not f.exists() or not (root / "current.md").exists():
+        return None
+    try:
+        meta = json.loads(f.read_text())
+    except (json.JSONDecodeError, OSError):
+        return None
+    return meta if isinstance(meta, dict) and isinstance(meta.get("version"), int) else None
+
+
+def _last_version(root: Path) -> int | None:
+    """Highest version seen in history/, used when current.meta.json is unusable."""
+    nums = [int(f.stem[1:]) for f in (root / "history").glob("v*.md") if f.stem[1:].isdigit()]
+    return max(nums) if nums else None
+
+
+def _write_atomic(path: Path, text: str) -> None:
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(text)
+    tmp.replace(path)
 
 
 def _error(message: str) -> dict:
@@ -69,22 +88,24 @@ def store(src: Path, root: Path, now: datetime | None = None) -> dict:
     meta = _meta(root)
     cur = root / "current.md"
     # Same file bytes, or a re-export with identical text, is the same CV.
-    if meta and (meta["sha256"] == sha or meta.get("text_sha256") == text_sha):
+    if meta and (meta.get("sha256") == sha or meta.get("text_sha256") == text_sha):
         return {"status": "unchanged", "version": meta["version"],
                 "previous_version": meta["version"], "path": str(cur),
                 "message": f"same CV as v{meta['version']}, nothing changed"}
     root.mkdir(parents=True, exist_ok=True)
-    prev = meta["version"] if meta else None
-    if prev is not None and cur.exists():
-        (root / "history").mkdir(exist_ok=True)
-        cur.replace(root / "history" / f"v{prev}.md")
+    (root / "history").mkdir(exist_ok=True)
+    prev = meta["version"] if meta else _last_version(root)
+    if cur.exists():
+        # Never lose a CV: an unversioned leftover (corrupt meta) is kept as an orphan copy.
+        name = f"v{prev}.md" if meta else f"orphan-{now:%Y%m%dT%H%M%S}.md"
+        cur.replace(root / "history" / name)
     version = (prev or 0) + 1
     stamp = now.isoformat(timespec="seconds")
     header = f"<!-- version: {version} | uploaded_at: {stamp} | original_filename: {src.name} -->\n"
-    cur.write_text(header + text.strip() + "\n")
+    _write_atomic(cur, header + text.strip() + "\n")
     new_meta = {"version": version, "uploaded_at": stamp, "sha256": sha,
                 "text_sha256": text_sha, "original_filename": src.name}
-    (root / "current.meta.json").write_text(json.dumps(new_meta, indent=2))
+    _write_atomic(root / "current.meta.json", json.dumps(new_meta, indent=2))
     return {"status": "stored", "version": version, "previous_version": prev, "path": str(cur),
             "message": f"stored CV v{version}"}
 

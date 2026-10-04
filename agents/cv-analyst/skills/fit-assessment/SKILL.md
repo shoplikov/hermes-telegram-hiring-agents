@@ -14,7 +14,7 @@ metadata:
 `TASK#<id> assess fit ...` or `TASK#<id>b tailor ...` from @alish_hr_coordinator_bot.
 
 ## Procedure — assess fit (TASK#N)
-1. `read_file ~/.hermes/profiles/cv-analyst/cv/current.meta.json`. If it does not exist → reply `@alish_hr_coordinator_bot FAILED#N no CV stored — user should send a CV to @alish_cv_analyst_bot with "new CV"` and stop.
+1. `read_file ~/.hermes/profiles/cv-analyst/cv/current.meta.json`. If it or `cv/current.md` does not exist → reply `@alish_hr_coordinator_bot FAILED#N no CV stored — user should send a CV to @alish_cv_analyst_bot with "new CV"` and stop.
 2. `read_file ~/.hermes/profiles/cv-analyst/cv/current.md` (always fresh, every task).
 3. For each requirement (MUST first, then NICE, then implicit: seniority, language, location, domain), find evidence in the CV. Accept equivalents (e.g. "PyTorch" satisfies "deep learning frameworks"; "led 3 engineers" satisfies "mentoring"). Rate ✅ strong / 🟡 partial / ❌ missing and quote the evidence (≤12 words).
 4. Use the terminal only for computation, e.g. summing years per skill from date ranges. Never count keyword overlap.

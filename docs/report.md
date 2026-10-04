@@ -204,5 +204,5 @@ The specialists' output is constrained by fixed templates, so it degrades gracef
 - **Scout depends on a keyless search backend (DDGS).** Search quality varies, and facts are marked "unverified" when the Scout can't confirm them.
 - **CV extraction is text-only.** A PDF with fewer than 30 extractable words (a scan, or a scan with only a page number or watermark as text) is refused and never replaces the stored CV (tested with an image-only PDF). Links and icons in PDF headers come out noisy (failure #8).
 - **Untested live:** the no-CV path and the URL-only posting path. Both are handled in the prompts (the Analyst returns FAILED and the Coordinator skips tailoring; the Coordinator asks for the posting text instead of a link), but they were only verified by review, not by a Telegram run.
-- **The CV store isn't crash-safe.** Writes are not atomic, and two simultaneous uploads could race. That's acceptable for one user.
+- **The CV store has no locking.** Each file is written atomically (temp file + rename) and a corrupt or half-deleted store is recovered without losing the old CV (tested), but two simultaneous uploads could still race. That's acceptable for one user.
 - **Single human user by design.** The privacy split assumes the group holds only the user and the three bots.

@@ -20,6 +20,19 @@ you ──@coordinator posting──▶ Coordinator ──@scout TASK#N──▶
 
 Upload your CV once (`@alish_cv_analyst_bot new CV` as the file caption). It is stored as `cv/current.md`; a newer upload becomes v2, v3… and the old one moves to `cv/history/`. Every task re-reads the current version.
 
+## Assignment checklist
+
+| Requirement | Where |
+|---|---|
+| ≥ 3 Hermes agents, each with its own Telegram bot (1 coordinator + 2 specialists) | `agents/coordinator`, `agents/scout`, `agents/cv-analyst`; table above |
+| Handoffs between bots by @mention | `TASK#N` / `RESULT#N` protocol in each `SOUL.md`; live runs in [docs/demo/transcript.md](docs/demo/transcript.md) |
+| Working end-to-end flow | Five real postings; clean post-fix run TASK#5 in the transcript |
+| Each agent's config and `SOUL.md` in the repo | `agents/*/config.yaml`, `agents/*/SOUL.md`, `agents/*/skills/` |
+| README with setup steps | This file |
+| No API keys or bot tokens committed | Only `.env.example` files are tracked; secrets stay in `~/.hermes/profiles/*/.env` |
+| Defense questions Q1–Q7 | [docs/report.md](docs/report.md) §3 |
+| A real failure example | [docs/failures.md](docs/failures.md) (11 logged; #5 is the main one) |
+
 More detail: [docs/report.md](docs/report.md) (architecture and design questions), [docs/failures.md](docs/failures.md) (what broke and why), [docs/demo/transcript.md](docs/demo/transcript.md) (a real end-to-end run).
 
 ## Repository layout
@@ -32,6 +45,7 @@ agents/
 scripts/
   setup.sh       installs the agents as Hermes profiles (idempotent)
   set-token.sh   stores one bot token in a profile's .env without echoing it
+  check.sh       verifies the install (profiles, links, tokens set, gateway settings) without printing secrets
 tests/test_cv_store.py
 docs/  report.md  failures.md  demo/  superpowers/ (design spec + implementation plan)
 ```
@@ -64,7 +78,7 @@ Create a group (e.g. "Job War Room"), add the three bots, and make all three **a
 ### 4. Install the agents
 
 ```bash
-git clone <this repo> ~/job-war-room && cd ~/job-war-room
+git clone https://github.com/shoplikov/hermes-telegram-hiring-agents.git ~/job-war-room && cd ~/job-war-room
 scripts/setup.sh                    # creates profiles coordinator, scout, cv-analyst
 scripts/set-token.sh coordinator    # run in a real terminal; paste the token at the hidden prompt
 scripts/set-token.sh scout
@@ -88,6 +102,7 @@ group_sessions_per_user: false
 ```bash
 hermes gateway restart
 hermes profile list        # coordinator, scout, cv-analyst should show "running"
+scripts/check.sh           # every line should say "ok"
 ```
 
 ## Usage
@@ -103,7 +118,8 @@ Address one bot per message. A message that mentions several bots wakes all of t
 ## Tests
 
 ```bash
-uv run pytest -q     # cv_store.py: versioning, unchanged detection, history, image-only/near-empty PDFs refused, PDF/DOCX extraction
+uv run pytest -q     # cv_store.py: versioning, unchanged detection, history, image-only/near-empty PDFs refused,
+                     # PDF/DOCX extraction, recovery from a corrupt or half-deleted store
 ```
 
 ## Troubleshooting
@@ -113,5 +129,6 @@ uv run pytest -q     # cv_store.py: versioning, unchanged detection, history, im
 | Specialists never react to the coordinator | Enable Bot-to-Bot Communication for the bots (step 2.3); bots must be admins with privacy off |
 | Duplicate handoffs or duplicate briefs | `group_sessions_per_user: false` in the **default** profile config, then restart the gateway |
 | Bot ignores a message | It must @mention that bot; for files, the mention goes in the file's caption |
+| Not sure what is misconfigured | `scripts/check.sh` lists every failing check |
 | `set-token.sh` says it needs an interactive terminal | Run it in a normal terminal, not through an AI assistant's shell |
 | Analyst says "no CV stored" | Upload a CV first (step 1 of Usage) |
