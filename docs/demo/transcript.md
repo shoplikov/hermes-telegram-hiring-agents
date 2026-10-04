@@ -1,5 +1,49 @@
 # Demo transcripts
 
+## Run 3 — TASK#6 (2026-10-04 23:18) — first live link test (failure #13)
+
+The user sent only an hh.kz link. It turned out to be a courier vacancy, which made it a good test of both new features.
+
+**What worked:**
+- The Coordinator saw there was no posting text and asked the Scout to fetch it.
+- The Scout read the page through `web_extract`: role, company, salary, requirements.
+- The user didn't get a CV tailored for a courier job.
+
+**What didn't follow the design** (failure #13, fixed after this run):
+- The fetch was sent as `TASK#6`, not `TASK#6f`, with the Coordinator's own field list. The Scout summarised instead of copying.
+- The Scout added an opinion: "the supplied link does not match the previously described AI vacancies".
+- The Coordinator decided "this is not an AI job" itself and stopped. The Analyst and the fit gate never ran.
+
+<details>
+<summary>Messages (verbatim, Scout result shortened)</summary>
+
+```text
+[23:18] user: @alish_hr_coordinator_bot Prepare me for this job:https://astana.hh.kz/vacancy/126828735?hhtmFrom=vacancy_search_list
+
+[23:18] Hiring Coordinator: I need the vacancy text first, so I'm asking the scout to extract it from the link now.
+@alish_company_scout_bot TASK#6 fetch and extract the full vacancy text from this URL: https://astana.hh.kz/vacancy/126828735?hhtmFrom=vacancy_search_list. Return the company name, role title, location, salary, responsibilities, MUST requirements, NICE requirements, and any other useful posting details, with sources.
+
+[23:18] Company Scout: @alish_hr_coordinator_bot RESULT#6
+Company: ИП Delivery Fast
+Role: Курьер на заказы (аптеки, постоматы, магазины, кофейни, сладости)
+Location: Astana; разъездной формат
+Salary: 650,000–1,350,000 KZT/month before taxes; ...
+MUST requirements:
+- No prior experience required.
+- Punctuality, attentiveness and responsibility.
+- Ability to navigate using maps.
+...
+- This is a delivery job, not an AI/technical role; the supplied link does not match the previously described AI vacancies.
+Source: https://astana.hh.kz/vacancy/126828735?hhtmFrom=vacancy_search_list
+
+[23:18] Hiring Coordinator: This link is not an AI job.
+It opens a courier/delivery vacancy at ИП Delivery Fast in Astana ... So I can't prepare you for a Senior ML/AI role from this URL.
+...
+If you meant a different AI vacancy, send the correct link or paste the text and I'll prepare you for it. If you want, I can also help you prepare for this courier role instead.
+```
+
+</details>
+
 ## Run 2 — TASK#5 (2026-10-04 21:13, after fixes #5–#7) — clean run
 
 Request: Senior Machine Learning Engineer, MiraiTech (SportTech startup, Astana). CV used: v2. All coordinator turns ran in ONE session (`agent:coordinator:telegram:group:-1004373703428`, no per-sender suffix), confirming fix #5.

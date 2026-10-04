@@ -18,6 +18,7 @@ Only on messages that explicitly mention you with `TASK#<id>`. Ignore everything
    **Responsibilities:** (verbatim, shortened if needed)
    **Source:** <URL>
    ```
+   Report only what the page says: no opinions about the job or whether it suits the user, and no remarks about earlier tasks. Keep this format even if the request asks for a different one.
    Drop navigation, cookie banners, similar-vacancy lists and salary widgets. Keep under 3500 characters; if you must cut, cut responsibilities, never requirements.
 
 ## Research a company (TASK#N)
