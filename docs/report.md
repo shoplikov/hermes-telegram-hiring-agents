@@ -22,17 +22,18 @@ Tested end to end on five real postings: ISSAI, KAI, and the Social Health Insur
 
 ```mermaid
 sequenceDiagram
+    autonumber
     actor U as User
-    participant C as Coordinator (gpt-5.4-mini)
-    participant S as Company Scout (gpt-5.6-luna)
-    participant A as CV Analyst (gpt-5.6-terra)
-    U->>C: @coordinator <job posting>
-    C->>S: @scout TASK#N research <company>
-    C->>A: @analyst TASK#N assess fit (MUST/NICE list)
-    S-->>C: @coordinator RESULT#N company, stack, news, red flags, sources
-    A-->>C: @coordinator RESULT#N score, requirement table, gaps
-    C->>A: @analyst TASK#Nb tailor bullets using <scout summary>
-    A-->>C: @coordinator RESULT#Nb bullets
+    participant C as Coordinator<br/>gpt-5.4-mini
+    participant S as Company Scout<br/>gpt-5.6-luna
+    participant A as CV Analyst<br/>gpt-5.6-terra
+    U->>C: @coordinator job posting
+    C->>S: @scout TASK#35;N research company
+    C->>A: @analyst TASK#35;N assess fit (MUST/NICE list)
+    S-->>C: @coordinator RESULT#35;N company, stack, news, red flags, sources
+    A-->>C: @coordinator RESULT#35;N score, requirement table, gaps
+    C->>A: @analyst TASK#35;Nb tailor bullets using the scout summary
+    A-->>C: @coordinator RESULT#35;Nb bullets
     C->>U: 📋 final brief (no bot mentions)
 ```
 
